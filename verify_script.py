@@ -9,10 +9,14 @@ sys.path.append(os.getcwd())
 load_dotenv()
 
 try:
-    from server import get_ledger_data, query_journal, _make_request
+    from src.beancount_fava_mcp.server import get_ledger_data, query_journal, _make_request
 except ImportError as e:
-    print(f"Failed to import server: {e}")
-    sys.exit(1)
+    # Try importing via installed package if local import fails
+    try:
+        from beancount_fava_mcp.server import get_ledger_data, query_journal, _make_request
+    except ImportError:
+        print(f"Failed to import server: {e}")
+        sys.exit(1)
 
 def test_connection():
     print("Testing connection to Fava...")

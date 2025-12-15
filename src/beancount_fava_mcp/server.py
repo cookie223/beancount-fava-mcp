@@ -8,14 +8,6 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Configuration
-FAVA_URL = os.getenv("FAVA_URL")
-FAVA_USERNAME = os.getenv("FAVA_USERNAME")
-FAVA_PASSWORD = os.getenv("FAVA_PASSWORD")
-
-if not FAVA_URL:
-    raise ValueError("FAVA_URL environment variable is required")
-
 # Initialize FastMCP server
 mcp = FastMCP("beancount-fava")
 
@@ -23,19 +15,29 @@ mcp = FastMCP("beancount-fava")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def _get_config():
+    url = os.getenv("FAVA_URL")
+    username = os.getenv("FAVA_USERNAME")
+    password = os.getenv("FAVA_PASSWORD")
+    if not url:
+        raise ValueError("FAVA_URL environment variable is required")
+    return url, username, password
+
 def _make_request(endpoint: str, params: Optional[dict] = None) -> Any:
     """Helper to make authenticated requests to Fava."""
-    url = f"{FAVA_URL.rstrip('/')}/{endpoint.lstrip('/')}"
+    url, username, password = _get_config()
+    
+    full_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
     auth = None
-    if FAVA_USERNAME and FAVA_PASSWORD:
-        auth = (FAVA_USERNAME, FAVA_PASSWORD)
+    if username and password:
+        auth = (username, password)
     
     try:
-        response = requests.get(url, auth=auth, params=params)
+        response = requests.get(full_url, auth=auth, params=params)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
-        logger.error(f"Error fetching data from {url}: {e}")
+        logger.error(f"Error fetching data from {full_url}: {e}")
         raise RuntimeError(f"Failed to communicate with Fava: {str(e)}")
 
 @mcp.tool()
@@ -123,6 +125,3 @@ def query_journal(
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
-
-if __name__ == "__main__":
-    mcp.run()

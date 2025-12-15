@@ -1,0 +1,18 @@
+[project]
+name = "beancount-fava-mcp"
+version = "0.0.1"
+description = "MCP server for Beancount Fava"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp",
+    "requests",
+    "python-dotenv"
+]
+
+[project.scripts]
+beancount-fava-mcp = "beancount_fava_mcp.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
