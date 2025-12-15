@@ -52,27 +52,71 @@ def get_ledger_data() -> str:
         return f"Error: {str(e)}"
 
 @mcp.tool()
-def query_journal(account: Optional[str] = None, filter_str: Optional[str] = None, time: Optional[str] = None) -> str:
+def query_journal(
+    account: str = None, 
+    time: str = None,
+    tags: list[str] = None,
+    links: list[str] = None,
+    payee: str = None,
+    narration: str = None,
+    extra_filter: str = None
+) -> str:
     """
-    Find user the exact journal entries.
+    Find user the exact journal entries using specific filters.
     
     Args:
-        account: The account to filter by (e.g. 'Assets:Balance:Giftcards:Fluz')
-        filter_str: Beancount query filter string (e.g. '#11IGF5GLD payee:"Fluz"')
-        time: Time period filter (e.g. '2024 - day')
+        account: The account to filter by (e.g. 'Assets:Balance')
+        time: Time period filter. Supports complex formats:
+              - Year: '2015'
+              - Quarter: '2012-Q1'
+              - Month: '2010-10'
+              - Week: '2016-W12'
+              - Day: '2015-06-12'
+              - Range: '2010 - 2012-10' (inclusive, linked by ' - ')
+        tags: List of tags to filter by (e.g. ['vacation', '2024']). logic is AND.
+        links: List of links to filter by (e.g. ['invoice-123']). logic is AND.
+        payee: Payee name to filter by (supports partial match/regex).
+        narration: Narration text to filter by (supports partial match/regex).
+        extra_filter: Any additional raw filter string (e.g. 'number > 100').
     """
-    # Use api/query with SELECT * to get entries in JSON format.
-    # Fava's api/query endpoint respects 'account', 'filter', and 'time' params
-    # to contextually filter the data before running the query.
     params = {
         "query_string": "SELECT *",
     }
+    
+    # Construct filter list
+    filter_parts = []
+    
     if account:
         params["account"] = account
-    if filter_str:
-        params["filter"] = filter_str
+        
     if time:
         params["time"] = time
+        
+    if tags:
+        for tag in tags:
+            # Ensure tag starts with #
+            clean_tag = tag.lstrip('#')
+            filter_parts.append(f"#{clean_tag}")
+            
+    if links:
+        for link in links:
+            # Ensure link starts with ^
+            clean_link = link.lstrip('^')
+            filter_parts.append(f"^{clean_link}")
+            
+    if payee:
+        clean_payee = payee.replace('"', '\\"')
+        filter_parts.append(f'payee:"{clean_payee}"')
+        
+    if narration:
+        clean_narration = narration.replace('"', '\\"')
+        filter_parts.append(f'narration:"{clean_narration}"')
+        
+    if extra_filter:
+        filter_parts.append(extra_filter)
+        
+    if filter_parts:
+        params["filter"] = " ".join(filter_parts)
         
     try:
         data = _make_request("api/query", params=params)

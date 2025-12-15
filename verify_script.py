@@ -33,14 +33,22 @@ def test_tools():
     except Exception as e:
         print(f"get_ledger_data failed: {e}")
 
-    print("\nTesting query_journal tool...")
+    print("\nTesting query_journal tool with new interface...")
     try:
-        # Using the example from the prompt
+        # Example: account, tag, and payee
+        # We need to clean up arguments based on the new signature
         account = "Assets:Balance:Giftcards:Fluz"
-        filter_str = 'payee:"Fluz"'
-        time = "2025-12-15"
-        data = query_journal(account=account, filter_str=filter_str, time=time)
-        print(f"query_journal result: {str(data)}")
+        # Assuming user has data matching this, otherwise we receive empty list but success
+        payee = "Flu" # Partial match for "Fluz"?
+        narration = "Reload" # Partial match for "Opening balance..."
+        # Testing the range syntax as requested by user
+        time = "2024-12-10 - 2025-W52" 
+        
+        print(f"Querying: account={account}, payee={payee}, narration={narration}, time={time}")
+        data = query_journal(account=account, payee=payee, narration=narration, time=time)
+        print(f"query_journal result: {str(data)}...")
+    except Exception as e:
+        print(f"query_journal failed: {e}")
     except Exception as e:
         print(f"query_journal failed: {e}")
 
