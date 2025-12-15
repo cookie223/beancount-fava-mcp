@@ -47,8 +47,71 @@ def get_ledger_data() -> str:
     """
     try:
         data = _make_request("api/ledger_data")
-        # Structure of response needs to be checked, but returning as string for now
-        # logic to parse helpful info can be added here
+        return str(data)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def get_accounts() -> str:
+    """
+    Get the list of all accounts in the ledger.
+    """
+    try:
+        data = _make_request("api/ledger_data")
+        if isinstance(data, dict) and "accounts" in data:
+            return str(data["accounts"])
+        return str(data)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def get_currencies() -> str:
+    """
+    Get the list of all currencies/commodities in the ledger.
+    """
+    try:
+        data = _make_request("api/ledger_data")
+        if isinstance(data, dict) and "commodities" in data:
+            return str(data["commodities"])
+        return str(data)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def get_payees() -> str:
+    """
+    Get the list of all payees in the ledger.
+    """
+    try:
+        data = _make_request("api/ledger_data")
+        if isinstance(data, dict) and "payees" in data:
+            return str(data["payees"])
+        return str(data)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def get_tags() -> str:
+    """
+    Get the list of all tags in the ledger.
+    """
+    try:
+        data = _make_request("api/ledger_data")
+        if isinstance(data, dict) and "tags" in data:
+            return str(data["tags"])
+        return str(data)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def get_links() -> str:
+    """
+    Get the list of all links in the ledger.
+    """
+    try:
+        data = _make_request("api/ledger_data")
+        if isinstance(data, dict) and "links" in data:
+            return str(data["links"])
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
