@@ -188,3 +188,18 @@ def query_journal(
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
+
+@mcp.tool()
+def run_bql(query: str) -> str:
+    """
+    Execute a raw Beancount Query Language (BQL) query.
+    
+    Args:
+        query: The BQL query string to execute.
+    """
+    try:
+        params = {"query_string": query}
+        data = _make_request("api/query", params=params)
+        return str(data)
+    except Exception as e:
+        return f"Error: {str(e)}"
