@@ -23,7 +23,7 @@ def _get_config():
         raise ValueError("FAVA_URL environment variable is required")
     return url, username, password
 
-def _make_request(endpoint: str, params: Optional[dict] = None) -> Any:
+def _make_request(endpoint: str, params: Optional[dict] = None, method: str = "GET", json_data: Optional[dict] = None) -> Any:
     """Helper to make authenticated requests to Fava."""
     url, username, password = _get_config()
     
@@ -33,7 +33,13 @@ def _make_request(endpoint: str, params: Optional[dict] = None) -> Any:
         auth = (username, password)
     
     try:
-        response = requests.get(full_url, auth=auth, params=params)
+        if method == "GET":
+            response = requests.get(full_url, auth=auth, params=params)
+        elif method == "PUT":
+            response = requests.put(full_url, auth=auth, params=params, json=json_data)
+        else:
+             raise ValueError(f"Unsupported method: {method}")
+            
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -203,3 +209,49 @@ def run_bql(query: str) -> str:
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
+
+@mcp.tool()
+def add_entry(
+    date: str,
+    payee: str,
+    narration: str,
+    postings: List[dict],
+    tags: Optional[List[str]] = None,
+    links: Optional[List[str]] = None,
+    metadata: Optional[dict] = None
+) -> str:
+    """
+    Add a new entry (Transaction) to the ledger.
+    
+    IMPORTANT: ASK THE USER TO REVIEW THE TRANSACTION DETAILS BEFORE CALLING THIS TOOL.
+    
+    Args:
+        date: The date of the transaction (YYYY-MM-DD).
+        payee: The payee string.
+        narration: The narration string.
+        postings: A list of postings. Each posting is a dict with:
+                  - 'account': str (e.g. 'Expenses:Food')
+                  - 'amount': str (e.g. '10.00 USD') - optional if inferred? Fava usually needs it.
+        tags: Optional list of tags.
+        links: Optional list of links.
+        metadata: Optional dictionary of metadata.
+    """
+    try:
+        entry = {
+            "t": "Transaction",
+            "date": date,
+            "payee": payee,
+            "narration": narration,
+            "postings": postings,
+            "tags": tags or [],
+            "links": links or [],
+            "meta": metadata or {}
+        }
+        
+        # Fava expects a list of entries
+        payload = {"entries": [entry]}
+        
+        data = _make_request("api/add_entries", method="PUT", json_data=payload)
+        return f"Success: {str(data)}"
+    except Exception as e:
+        return f"Error adding entry: {str(e)}"

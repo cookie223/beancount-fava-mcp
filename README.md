@@ -29,7 +29,7 @@ It allows for simple authentication, but it is optional. You can set the followi
 
 ## Future Plans
 
-- Support some kind of write access to the ledger so that you can add transactions easily via your mcp client.
+- Support some kind of write access to the ledger so that you can add transactions easily via your mcp client. (add_entry added but still WIP)
 
 ## Usage
 
