@@ -211,7 +211,7 @@ def run_bql(query: str) -> str:
         return f"Error: {str(e)}"
 
 @mcp.tool()
-def add_entry(
+def add_transaction(
     date: str,
     payee: str,
     narration: str,

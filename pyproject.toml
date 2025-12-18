@@ -1,6 +1,6 @@
 [project]
 name = "beancount-fava-mcp"
-version = "0.0.2"
+version = "0.0.4"
 description = "MCP server for Beancount Fava"
 readme = "README.md"
 requires-python = ">=3.10"
