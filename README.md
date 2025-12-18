@@ -18,14 +18,15 @@ It allows for simple authentication, but it is optional. You can set the followi
 
 ## Features
 
-- Get ledger data
-- Get accounts
-- Get currencies
-- Get payees
-- Get tags
-- Get links
-- Query journal
-- Run BQL
+- `get_ledger_data()`: List all ledger data including account names, tags, and links.
+- `get_accounts()`: Get the list of all accounts.
+- `get_currencies()`: Get the list of all currencies/commodities.
+- `get_payees()`: Get the list of all payees.
+- `get_tags()`: Get the list of all tags.
+- `get_links()`: Get the list of all links.
+- `query_journal(account, time, tags, links, payee, narration, extra_filter)`: Filter journal entries.
+- `run_bql(query)`: Execute raw Beancount Query Language queries.
+- `add_transaction(date, payee, narration, postings, tags, links, metadata, flag)`: Add a new transaction entry. **Note:** Review the transaction details carefully before execution.
 
 ## Future Plans
 

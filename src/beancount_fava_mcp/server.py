@@ -218,7 +218,8 @@ def add_transaction(
     postings: List[dict],
     tags: Optional[List[str]] = None,
     links: Optional[List[str]] = None,
-    metadata: Optional[dict] = None
+    metadata: Optional[dict] = None,
+    flag: Optional[str] = "*"
 ) -> str:
     """
     Add a new entry (Transaction) to the ledger.
@@ -231,14 +232,27 @@ def add_transaction(
         narration: The narration string.
         postings: A list of postings. Each posting is a dict with:
                   - 'account': str (e.g. 'Expenses:Food')
-                  - 'amount': str (e.g. '10.00 USD') - optional if inferred? Fava usually needs it.
+                  - 'amount': str (e.g. '10.00 USD') - The full amount string including currency.
+                               For complex postings (prices, costs), put the full string here 
+                               (e.g. '10 AAPL {150 USD} @ 160 USD').
         tags: Optional list of tags.
         links: Optional list of links.
         metadata: Optional dictionary of metadata.
+        flag: Flag for the transaction. Defaults to "*" means posted or cleared, it can be "!" to mean needs attention
     """
     try:
+        # Validate accounts
+        ledger_data = _make_request("api/ledger_data")
+        valid_accounts = set(ledger_data.get("accounts", []))
+        
+        for p in postings:
+            account = p.get("account")
+            if account not in valid_accounts:
+                return f"Error: Account '{account}' does not exist in the ledger. Please check the account name or create it first."
+
         entry = {
             "t": "Transaction",
+            "flag": flag,
             "date": date,
             "payee": payee,
             "narration": narration,
