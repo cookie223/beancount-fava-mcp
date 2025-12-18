@@ -243,12 +243,18 @@ def add_transaction(
     try:
         # Validate accounts
         ledger_data = _make_request("api/ledger_data")
-        valid_accounts = set(ledger_data.get("accounts", []))
+        # Ensure we have a set of stripped strings
+        valid_accounts = {str(a).strip() for a in ledger_data.get("accounts", [])}
         
         for p in postings:
-            account = p.get("account")
+            raw_account = p.get("account", "")
+            account = str(raw_account).strip()
+            
+            # Update the posting with the clean account name
+            p["account"] = account
+            
             if account not in valid_accounts:
-                return f"Error: Account '{account}' does not exist in the ledger. Please check the account name or create it first."
+                return f"Error: Account '{account}' does not exist in the ledger. Please check the account name or create it first. Available accounts count: {len(valid_accounts)}"
 
         entry = {
             "t": "Transaction",
