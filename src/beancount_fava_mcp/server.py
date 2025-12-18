@@ -64,8 +64,11 @@ def get_accounts() -> str:
     """
     try:
         data = _make_request("api/ledger_data")
-        if isinstance(data, dict) and "accounts" in data:
-            return str(data["accounts"])
+        if isinstance(data, dict):
+            if "data" in data and isinstance(data["data"], dict) and "accounts" in data["data"]:
+                return str(data["data"]["accounts"])
+            if "accounts" in data:
+                return str(data["accounts"])
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
@@ -77,8 +80,11 @@ def get_currencies() -> str:
     """
     try:
         data = _make_request("api/ledger_data")
-        if isinstance(data, dict) and "commodities" in data:
-            return str(data["commodities"])
+        if isinstance(data, dict):
+            if "data" in data and isinstance(data["data"], dict) and "commodities" in data["data"]:
+                return str(data["data"]["commodities"])
+            if "commodities" in data:
+                return str(data["commodities"])
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
@@ -90,8 +96,11 @@ def get_payees() -> str:
     """
     try:
         data = _make_request("api/ledger_data")
-        if isinstance(data, dict) and "payees" in data:
-            return str(data["payees"])
+        if isinstance(data, dict):
+            if "data" in data and isinstance(data["data"], dict) and "payees" in data["data"]:
+                return str(data["data"]["payees"])
+            if "payees" in data:
+                return str(data["payees"])
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
@@ -103,8 +112,11 @@ def get_tags() -> str:
     """
     try:
         data = _make_request("api/ledger_data")
-        if isinstance(data, dict) and "tags" in data:
-            return str(data["tags"])
+        if isinstance(data, dict):
+            if "data" in data and isinstance(data["data"], dict) and "tags" in data["data"]:
+                return str(data["data"]["tags"])
+            if "tags" in data:
+                return str(data["tags"])
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
@@ -116,8 +128,11 @@ def get_links() -> str:
     """
     try:
         data = _make_request("api/ledger_data")
-        if isinstance(data, dict) and "links" in data:
-            return str(data["links"])
+        if isinstance(data, dict):
+            if "data" in data and isinstance(data["data"], dict) and "links" in data["data"]:
+                return str(data["data"]["links"])
+            if "links" in data:
+                return str(data["links"])
         return str(data)
     except Exception as e:
         return f"Error: {str(e)}"
@@ -243,8 +258,17 @@ def add_transaction(
     try:
         # Validate accounts
         ledger_data = _make_request("api/ledger_data")
+        
+        # Handle nested data structure from Fava API
+        accounts_list = []
+        if isinstance(ledger_data, dict):
+            if "data" in ledger_data and isinstance(ledger_data["data"], dict):
+                accounts_list = ledger_data["data"].get("accounts", [])
+            else:
+                accounts_list = ledger_data.get("accounts", [])
+                
         # Ensure we have a set of stripped strings
-        valid_accounts = {str(a).strip() for a in ledger_data.get("accounts", [])}
+        valid_accounts = {str(a).strip() for a in accounts_list}
         
         for p in postings:
             raw_account = p.get("account", "")
